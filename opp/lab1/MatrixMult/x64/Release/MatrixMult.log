@@ -1,0 +1,10 @@
+﻿  my.c
+d:\repos\opp\matrixmult\matrixmult\my.c(40): warning C4305: инициализация: усечение из "double" в "float"
+d:\repos\opp\matrixmult\matrixmult\my.c(55): warning C4244: return: преобразование "double" в "float", возможна потеря данных
+d:\repos\opp\matrixmult\matrixmult\my.c(75): warning C4305: инициализация: усечение из "double" в "float"
+  Создание кода
+  1 of 8 functions (12.5%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Создание кода завершено
+  MatrixMult.vcxproj -> D:\repos\opp\MatrixMult\x64\Release\MatrixMult.exe
