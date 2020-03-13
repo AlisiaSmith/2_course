@@ -7,8 +7,8 @@
 
 struct timeval tv1,tv2;
 
-#define N 1536
-#define EPS 0.0000001
+#define N 1024
+#define EPS 0.000001
 #define TAU 0.001
 
 
@@ -98,7 +98,7 @@ int main(int argc, char **argv)
 	}
 	
 	gettimeofday(&tv2,NULL);
-	//show(x, size);
+	show(x, size);
 
 	double dt_sec = (tv2.tv_sec, tv1.tv_sec);
 	double dt_usec = (tv2.tv_usec, tv1.tv_usec);

@@ -1,22 +1,14 @@
 #include <stdlib.h>
 #include <math.h>
+#include <mpi.h>
 #include <stdio.h>
-#include <sys/time.h>
 
 #include "fulling.h"
 
-struct timeval tv1,tv2;
-
-#define N 1536
-#define EPS 0.0000001
+#define N 32
+#define EPS 0.00001
 #define TAU 0.001
 
-
-void show(double* vect, size_t size)
-{
-	for (int i = 0; i < size; ++i)
-		printf("x[%d] = %f \n", i, vect[i]);
-}
 
 void VECTxSCAL(double* res, double* vect, double scal, size_t size)
 {
@@ -24,12 +16,12 @@ void VECTxSCAL(double* res, double* vect, double scal, size_t size)
 		res[i] = vect[i] * scal;
 }
 
-void MATxVECT(double* res, double* mat, double* vect, size_t size)
+void MATxVECT(double* res, double* mat, double* vect, size_t n, int size)
 {
 	for (int i = 0; i < size; ++i)
 	{
 		double tmp = 0;
-		for (int j = 0; j < size; ++j)
+		for (int j = 0; j < n; ++j)
 			tmp += mat[i * size + j] * vect[j];
 		res[i] = tmp;
 	}
@@ -75,40 +67,46 @@ double condition(double* xn, double* b, double* A, size_t size)
 
 int main(int argc, char **argv)
 {
-	gettimeofday(&tv1,NULL);
+	int np, pid;
+	
+	MPI_Init(&argc, &argv);
+	MPI_Comm_size(MPI_COMM_WORLD, &np); 
+	MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+	
+	if(N % np != 0)	
+	{
+		if(pid == 0)
+			printf("%d % %d != 0 \n", N, np);
+		MPI_Finalize();
+		return 0;
+	}
 
-	size_t size = N;
+	size_t size = N / np;
 	double E = EPS;
 
-	
-	double* A = (double*)malloc(sizeof(double) * N * N);
+	double* A = (double*)malloc(sizeof(double) * N * size);
 	double* b = (double*)malloc(sizeof(double) * N);
 	double* x = (double*)malloc(sizeof(double) * N);
 	double* next_x = (double*)malloc(sizeof(double) * N);
 
-	full_1(A, b, x, size);
+	full_1(A, b, x, size, N, pid);
 
-	while (condition(x, b, A, size) >= E)
-	{
+
+		while (condition(x, b, A, size) >= E)
+		{
 		approx(next_x, x, b, A, size);
 		
 		double* tmp = next_x;
 		next_x = x;
 		x = tmp;
-	}
-	
-	gettimeofday(&tv2,NULL);
-	//show(x, size);
+		}
 
-	double dt_sec = (tv2.tv_sec, tv1.tv_sec);
-	double dt_usec = (tv2.tv_usec, tv1.tv_usec);
-	double dt = dt_sec + 1e-6*dt_usec;
-	printf("time diff %e \n",dt);
-	
+
 	free(next_x);
 	free(x);
 	free(b);
 	free(A);
-
+	MPI_Finalize();
+	
 	return 0;
 }
