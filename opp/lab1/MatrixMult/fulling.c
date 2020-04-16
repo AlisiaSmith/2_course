@@ -24,9 +24,25 @@ void full_2(double* A, double* b, double* x, size_t size)
 
 	for (int i = 0; i < size; ++i)
 		x[i] = size - i;
-	
+
 	MATxVECT(b, A, x, size);
-	
+
 	for (int i = 0; i < size; ++i)
 		x[i] = 0;
+}
+
+void full_3(double* A, double* b, double* x, size_t size)
+{
+	srand(time(NULL));
+	for(int i = 0; i < size; i++)
+		for (int j = 0; j < size; j++)
+			A[i*size + j] = rand() % 21;
+
+			for (int i = 0; i < size; ++i)
+				x[i] = rand() % 21;
+
+			MATxVECT(b, A, x, size);
+
+			for (int i = 0; i < size; ++i)
+					x[i] = 0;
 }

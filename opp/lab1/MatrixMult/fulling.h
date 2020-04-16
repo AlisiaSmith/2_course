@@ -1,7 +1,9 @@
 #include <stdlib.h>
+#include <time.h>
 
 void full_1(double* A, double* b, double* x, size_t size);
 void full_2(double* A, double* b, double* x, size_t size);
+void full_3(double* A, double* b, double* x, size_t size);
 
 void VECTxSCAL(double* res, double* vect, double scal, size_t size);
 void MATxVECT(double* res, double* mat, double* vect, size_t size);

@@ -7,8 +7,8 @@
 
 struct timeval tv1,tv2;
 
-#define N 1536
-#define EPS 0.0000001
+#define N 6144
+#define EPS 0.00000001
 #define TAU 0.001
 
 
@@ -62,14 +62,14 @@ double norm(double* vect, size_t size)
 double condition(double* xn, double* b, double* A, size_t size)
 {
 	double* tmp = (double*)malloc(sizeof(double) * N);
-	
+
 	MATxVECT(tmp, A, xn, size);
 	VECTsubVECT(tmp, tmp, b, size);
 
 	double n = norm(tmp, size) / norm(b, size);
-	
+
 	free(tmp);
-	
+
 	return n;
 }
 
@@ -78,25 +78,26 @@ int main(int argc, char **argv)
 	gettimeofday(&tv1,NULL);
 
 	size_t size = N;
-	double E = EPS;
 
-	
+
 	double* A = (double*)malloc(sizeof(double) * N * N);
 	double* b = (double*)malloc(sizeof(double) * N);
 	double* x = (double*)malloc(sizeof(double) * N);
 	double* next_x = (double*)malloc(sizeof(double) * N);
 
-	full_1(A, b, x, size);
+	full_3(A, b, x, size);
 
-	while (condition(x, b, A, size) >= E)
+	double E = condition(x, b, A, size);
+	while (E >= EPS)
 	{
 		approx(next_x, x, b, A, size);
-		
+
 		double* tmp = next_x;
 		next_x = x;
 		x = tmp;
+		E = condition(x, b, A, size);
 	}
-	
+
 	gettimeofday(&tv2,NULL);
 	//show(x, size);
 
@@ -104,7 +105,7 @@ int main(int argc, char **argv)
 	double dt_usec = (tv2.tv_usec, tv1.tv_usec);
 	double dt = dt_sec + 1e-6*dt_usec;
 	printf("time diff %e \n",dt);
-	
+
 	free(next_x);
 	free(x);
 	free(b);
