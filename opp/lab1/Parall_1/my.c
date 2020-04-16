@@ -8,10 +8,18 @@
 
 struct timeval tv1,tv2;
 
-#define N 12288
+#define N 10
 #define EPS 0.00000001
 #define TAU 0.001
 
+
+void show (double* vect, size_t size, char* c)
+{
+	for(int i = 0; i < size; i++)
+	{
+		printf("%s[%d] = %f \n", c, i, vect[i]);
+	}
+}
 
 void VECTxSCAL( double* res, double* vect, double scal, size_t size)
 {
@@ -22,7 +30,7 @@ void VECTxSCAL( double* res, double* vect, double scal, size_t size)
 void VECTsubVECT( double* res, size_t sRes, double* vect1, double* vect2)
 {
   for(int i = 0; i < sRes; ++i)
-    res[i] = vect1[i] - vect1[i];
+		res[i] = vect1[i] - vect2[i];
 }
 
 void MATxVECT(  double* res, size_t sRes,
@@ -61,7 +69,7 @@ double qNorm(double* vect, size_t size)
 	for (int i = 0; i < size; ++i)
 		res += vect[i] * vect[i];
 	return res;
-} //?
+}
 
 
 double condition( double* A, size_t sMatV,
@@ -78,6 +86,7 @@ double condition( double* A, size_t sMatV,
 
     double n1 = qNorm(tmp, sMatV);
     double n2 = qNorm(b + shift, sMatV);
+
     double sum1 = 0, sum2 = 0;
     MPI_Reduce(&n1,&sum1, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(&n2,&sum2, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
@@ -88,7 +97,7 @@ double condition( double* A, size_t sMatV,
     if (tid == 0)     n = sqrt(sum1 / sum2);
     MPI_Bcast(&n, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-    return 0;
+    return n;
 }
 
 
@@ -116,7 +125,6 @@ int main(int argc, char **argv)
 	double* x = (double*)malloc(sizeof(double) * N);
 	double* next_x = (double*)malloc(sizeof(double) * N);
 
-/*
 	for(int i = 0; i < size; i++)
 		for (int j = 0; j < N; j++)
 			A[i*size + j] = (tid*size + i == j) ? 2.0:1.0;
@@ -126,8 +134,8 @@ int main(int argc, char **argv)
 		b[i] = N + 1;
 		x[i] = 0;
 	}
-	*/
-	srand(time(NULL));
+
+/*	srand(time(NULL));
 	for(int i = 0; i < size; i++)
 		for (int j = 0; j < N; j++)
 			A[i*size + j] = rand() % 21;
@@ -135,9 +143,9 @@ int main(int argc, char **argv)
 			for (int i = 0; i < N; ++i)
 				x[i] = rand() % 21;
 
-			MATxVECT(b, size, x, N, A);
+		MATxVECT(b, size, x, N, A);
 
-			if(tid == 0)
+		if(tid == 0)
 				for(int i = 1; i < size_proc; ++i)
 					MPI_Recv(b + size*i, size, MPI_DOUBLE, i, 123, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
@@ -146,16 +154,15 @@ int main(int argc, char **argv)
 
 		  MPI_Bcast(b, N, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-
 			for (int i = 0; i < N; ++i)
 					x[i] = 0;
-
+*/
 
   double E = condition(A, size, x, b, N, tid);
 
 	while (E >= EPS )
 	{
-    approx(next_x, size, x, b, A, N, tid);
+		approx(next_x, size, x, b, A, N, tid);
 
     if(tid == 0)
 		{
@@ -173,10 +180,11 @@ int main(int argc, char **argv)
 		}
 
 	gettimeofday(&tv2,NULL);
-	//show(x, size);
+
 
 	if(tid == 0)
 	{
+	//	show(x, N, "x");
 		double dt_sec = (tv2.tv_sec, tv1.tv_sec);
 		double dt_usec = (tv2.tv_usec, tv1.tv_usec);
 		double dt = dt_sec + 1e-6*dt_usec;
