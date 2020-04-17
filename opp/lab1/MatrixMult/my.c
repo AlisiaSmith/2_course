@@ -7,15 +7,14 @@
 
 struct timeval tv1,tv2;
 
-#define N 6144
+#define N 8
 #define EPS 0.00000001
-#define TAU 0.001
-
+#define TAU 0.01
 
 void show(double* vect, size_t size)
 {
 	for (int i = 0; i < size; ++i)
-		printf("x[%d] = %f \n", i, vect[i]);
+		printf("x[%d] = %10.8f \n", i, vect[i]);
 }
 
 void VECTxSCAL(double* res, double* vect, double scal, size_t size)
@@ -85,11 +84,12 @@ int main(int argc, char **argv)
 	double* x = (double*)malloc(sizeof(double) * N);
 	double* next_x = (double*)malloc(sizeof(double) * N);
 
-	full_3(A, b, x, size);
+	full_1(A, b, x, size);
 
 	double E = condition(x, b, A, size);
 	while (E >= EPS)
 	{
+
 		approx(next_x, x, b, A, size);
 
 		double* tmp = next_x;
@@ -99,7 +99,7 @@ int main(int argc, char **argv)
 	}
 
 	gettimeofday(&tv2,NULL);
-	//show(x, size);
+
 
 	double dt_sec = (tv2.tv_sec, tv1.tv_sec);
 	double dt_usec = (tv2.tv_usec, tv1.tv_usec);

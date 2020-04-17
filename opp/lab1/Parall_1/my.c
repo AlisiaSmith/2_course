@@ -5,19 +5,29 @@
 #include <time.h>
 #include <sys/time.h>
 
-
-struct timeval tv1,tv2;
-
-#define N 10
-#define EPS 0.00000001
+#define N 1024
+#define EPS 0.000000001
 #define TAU 0.001
 
 
-void show (double* vect, size_t size, char* c)
+struct timeval tv1,tv2,dtv;
+//struct timezone tz;
+void time_start() { gettimeofday(&tv1, NULL); }
+long time_stop()
 {
+		gettimeofday(&tv2, NULL);
+  	dtv.tv_sec= tv2.tv_sec -tv1.tv_sec;
+  	dtv.tv_usec=tv2.tv_usec-tv1.tv_usec;
+  	if(dtv.tv_usec<0) { dtv.tv_sec--; dtv.tv_usec+=1000000; }
+  	return dtv.tv_sec*1000+dtv.tv_usec/1000;
+}
+
+void show (double* vect, size_t size, char* c, int tid)
+{
+	if (tid != 0) return;
 	for(int i = 0; i < size; i++)
 	{
-		printf("%s[%d] = %f \n", c, i, vect[i]);
+		printf("tid[%d]: %s[%d] = %10.8f \n", tid, c, i, vect[i]);
 	}
 }
 
@@ -88,18 +98,13 @@ double condition( double* A, size_t sMatV,
     double n2 = qNorm(b + shift, sMatV);
 
     double sum1 = 0, sum2 = 0;
-    MPI_Reduce(&n1,&sum1, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    MPI_Reduce(&n2,&sum2, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
-    free(tmp);
+		MPI_Allreduce(&n1,&sum1, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+		MPI_Allreduce(&n2,&sum2, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-    double n;
-    if (tid == 0)     n = sqrt(sum1 / sum2);
-    MPI_Bcast(&n, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-    return n;
+		free(tmp);
+		return sqrt(sum1 / sum2);
 }
-
 
 int main(int argc, char **argv)
 {
@@ -116,7 +121,7 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	gettimeofday(&tv1,NULL);
+	time_start();
 
 	size_t size = N / size_proc;
 
@@ -127,7 +132,7 @@ int main(int argc, char **argv)
 
 	for(int i = 0; i < size; i++)
 		for (int j = 0; j < N; j++)
-			A[i*size + j] = (tid*size + i == j) ? 2.0:1.0;
+			A[i*N + j] = (tid*size + i) == j ? 2.0:1.0;
 
 	for (int i = 0; i < N; ++i)
 	{
@@ -159,7 +164,6 @@ int main(int argc, char **argv)
 */
 
   double E = condition(A, size, x, b, N, tid);
-
 	while (E >= EPS )
 	{
 		approx(next_x, size, x, b, A, N, tid);
@@ -179,16 +183,16 @@ int main(int argc, char **argv)
       E = condition( A, size, x, b, N, tid);
 		}
 
-	gettimeofday(&tv2,NULL);
+	long dt = time_stop();
 
 
 	if(tid == 0)
 	{
-	//	show(x, N, "x");
-		double dt_sec = (tv2.tv_sec, tv1.tv_sec);
+	 // show(x, N, "x", tid);
+	/*	double dt_sec = (tv2.tv_sec, tv1.tv_sec);
 		double dt_usec = (tv2.tv_usec, tv1.tv_usec);
-		double dt = dt_sec + 1e-6*dt_usec;
-		printf("time diff %e \n",dt);
+		double dt = dt_sec + 1e-6*dt_usec;*/
+		printf("time diff %ld ms \n",dt);
 	}
 	free(next_x);
 	free(x);
