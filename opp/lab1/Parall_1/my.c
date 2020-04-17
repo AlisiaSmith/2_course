@@ -7,7 +7,7 @@
 
 #define N 1024
 #define EPS 0.000000001
-#define TAU 0.001
+#define TAU 0.01
 
 
 struct timeval tv1,tv2,dtv;
@@ -21,16 +21,6 @@ long time_stop()
   	return dtv.tv_sec*1000+dtv.tv_usec/1000;
 }
 
-void show (double* vect, size_t size, char* c, int tid)
-{
-	if (tid != 0) return;
-	for(int i = 0; i < size; i++)
-	{
-		printf("tid[%d]: %s[%d] = %10.8f \n", tid, c, i, vect[i]);
-	}
-}
-
-
 void fulling(double* A, double* x, double* b, size_t size, int tid)
 {
 	for(int i = 0; i < size; i++)
@@ -42,28 +32,6 @@ void fulling(double* A, double* x, double* b, size_t size, int tid)
 		b[i] = N + 1;
 		x[i] = 0;
 	}
-	/*	srand(time(NULL));
-		for(int i = 0; i < size; i++)
-			for (int j = 0; j < N; j++)
-				A[i*size + j] = rand() % 21;
-
-				for (int i = 0; i < N; ++i)
-					x[i] = rand() % 21;
-
-			MATxVECT(b, size, x, N, A);
-
-			if(tid == 0)
-					for(int i = 1; i < size_proc; ++i)
-						MPI_Recv(b + size*i, size, MPI_DOUBLE, i, 123, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-			else
-					MPI_Send(b, size, MPI_DOUBLE, 0, 123, MPI_COMM_WORLD);
-
-			  MPI_Bcast(b, N, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-				for (int i = 0; i < N; ++i)
-						x[i] = 0;
-	*/
 }
 
 void VECTxSCAL( double* res, double* vect, double scal, size_t size)

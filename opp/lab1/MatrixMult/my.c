@@ -3,18 +3,33 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-#include "fulling.h"
-
-struct timeval tv1,tv2;
-
-#define N 8
-#define EPS 0.00000001
+#define N 1024
+#define EPS 0.000000001
 #define TAU 0.01
 
-void show(double* vect, size_t size)
+struct timeval tv1,tv2,dtv;
+void time_start() { gettimeofday(&tv1, NULL); }
+long time_stop()
+{
+		gettimeofday(&tv2, NULL);
+  	dtv.tv_sec= tv2.tv_sec -tv1.tv_sec;
+  	dtv.tv_usec=tv2.tv_usec-tv1.tv_usec;
+  	if(dtv.tv_usec<0) { dtv.tv_sec--; dtv.tv_usec+=1000000; }
+  	return dtv.tv_sec*1000+dtv.tv_usec/1000;
+}
+
+
+void fulling(double* A, double* b, double* x, size_t size)
 {
 	for (int i = 0; i < size; ++i)
-		printf("x[%d] = %10.8f \n", i, vect[i]);
+		for (int j = 0; j < size; ++j)
+			A[i*size + j] = (i == j) ? 2.0 : 1.0;
+
+	for (int i = 0; i < size; ++i)
+	{
+		b[i] = size + 1;
+		x[i] = 0;
+	}
 }
 
 void VECTxSCAL(double* res, double* vect, double scal, size_t size)
@@ -74,17 +89,15 @@ double condition(double* xn, double* b, double* A, size_t size)
 
 int main(int argc, char **argv)
 {
-	gettimeofday(&tv1,NULL);
-
+	time_start();
 	size_t size = N;
-
 
 	double* A = (double*)malloc(sizeof(double) * N * N);
 	double* b = (double*)malloc(sizeof(double) * N);
 	double* x = (double*)malloc(sizeof(double) * N);
 	double* next_x = (double*)malloc(sizeof(double) * N);
 
-	full_1(A, b, x, size);
+	fulling(A, b, x, size);
 
 	double E = condition(x, b, A, size);
 	while (E >= EPS)
@@ -98,13 +111,9 @@ int main(int argc, char **argv)
 		E = condition(x, b, A, size);
 	}
 
-	gettimeofday(&tv2,NULL);
+	long dt = time_stop();
 
-
-	double dt_sec = (tv2.tv_sec, tv1.tv_sec);
-	double dt_usec = (tv2.tv_usec, tv1.tv_usec);
-	double dt = dt_sec + 1e-6*dt_usec;
-	printf("time diff %e \n",dt);
+	printf("time diff %ld ms\n", dt);
 
 	free(next_x);
 	free(x);
