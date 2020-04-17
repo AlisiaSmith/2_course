@@ -11,7 +11,6 @@
 
 
 struct timeval tv1,tv2,dtv;
-//struct timezone tz;
 void time_start() { gettimeofday(&tv1, NULL); }
 long time_stop()
 {
@@ -29,6 +28,42 @@ void show (double* vect, size_t size, char* c, int tid)
 	{
 		printf("tid[%d]: %s[%d] = %10.8f \n", tid, c, i, vect[i]);
 	}
+}
+
+
+void fulling(double* A, double* x, double* b, size_t size, int tid)
+{
+	for(int i = 0; i < size; i++)
+		for (int j = 0; j < N; j++)
+			A[i*N + j] = (tid*size + i) == j ? 2.0:1.0;
+
+	for (int i = 0; i < N; ++i)
+	{
+		b[i] = N + 1;
+		x[i] = 0;
+	}
+	/*	srand(time(NULL));
+		for(int i = 0; i < size; i++)
+			for (int j = 0; j < N; j++)
+				A[i*size + j] = rand() % 21;
+
+				for (int i = 0; i < N; ++i)
+					x[i] = rand() % 21;
+
+			MATxVECT(b, size, x, N, A);
+
+			if(tid == 0)
+					for(int i = 1; i < size_proc; ++i)
+						MPI_Recv(b + size*i, size, MPI_DOUBLE, i, 123, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+			else
+					MPI_Send(b, size, MPI_DOUBLE, 0, 123, MPI_COMM_WORLD);
+
+			  MPI_Bcast(b, N, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+				for (int i = 0; i < N; ++i)
+						x[i] = 0;
+	*/
 }
 
 void VECTxSCAL( double* res, double* vect, double scal, size_t size)
@@ -108,7 +143,7 @@ double condition( double* A, size_t sMatV,
 
 int main(int argc, char **argv)
 {
-	int size_proc, tid;
+		int size_proc, tid;
 
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &size_proc);
@@ -130,70 +165,19 @@ int main(int argc, char **argv)
 	double* x = (double*)malloc(sizeof(double) * N);
 	double* next_x = (double*)malloc(sizeof(double) * N);
 
-	for(int i = 0; i < size; i++)
-		for (int j = 0; j < N; j++)
-			A[i*N + j] = (tid*size + i) == j ? 2.0:1.0;
-
-	for (int i = 0; i < N; ++i)
-	{
-		b[i] = N + 1;
-		x[i] = 0;
-	}
-
-/*	srand(time(NULL));
-	for(int i = 0; i < size; i++)
-		for (int j = 0; j < N; j++)
-			A[i*size + j] = rand() % 21;
-
-			for (int i = 0; i < N; ++i)
-				x[i] = rand() % 21;
-
-		MATxVECT(b, size, x, N, A);
-
-		if(tid == 0)
-				for(int i = 1; i < size_proc; ++i)
-					MPI_Recv(b + size*i, size, MPI_DOUBLE, i, 123, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-		else
-				MPI_Send(b, size, MPI_DOUBLE, 0, 123, MPI_COMM_WORLD);
-
-		  MPI_Bcast(b, N, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-			for (int i = 0; i < N; ++i)
-					x[i] = 0;
-*/
+	fulling(A, x, b, size, tid);
 
   double E = condition(A, size, x, b, N, tid);
 	while (E >= EPS )
 	{
 		approx(next_x, size, x, b, A, N, tid);
-
-    if(tid == 0)
-		{
-      double* tmp = next_x;
-    	next_x = x;
-    	x = tmp;
-      for(int i = 1; i < size_proc; ++i)
-        MPI_Recv(x + size*i, size, MPI_DOUBLE, i, 123, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    }
-    else
-      MPI_Send(next_x, size, MPI_DOUBLE, 0, 123, MPI_COMM_WORLD);
-
-      MPI_Bcast(x, N, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-      E = condition( A, size, x, b, N, tid);
+		MPI_Allgather(next_x, size, MPI_DOUBLE, x, size, MPI_DOUBLE, MPI_COMM_WORLD);
+    E = condition( A, size, x, b, N, tid);
 		}
 
 	long dt = time_stop();
+	if(tid == 0)		printf("time diff %ld ms \n",dt);
 
-
-	if(tid == 0)
-	{
-	 // show(x, N, "x", tid);
-	/*	double dt_sec = (tv2.tv_sec, tv1.tv_sec);
-		double dt_usec = (tv2.tv_usec, tv1.tv_usec);
-		double dt = dt_sec + 1e-6*dt_usec;*/
-		printf("time diff %ld ms \n",dt);
-	}
 	free(next_x);
 	free(x);
   free(b);
