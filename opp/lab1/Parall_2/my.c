@@ -70,7 +70,7 @@ void approx(  double* res, size_t sRes,
 	double* X = (double*)malloc(sizeof(double) * N);
 	MPI_Allgather(xn, sRes, MPI_DOUBLE, X, sRes, MPI_DOUBLE, MPI_COMM_WORLD);
 
-  MATxVECT(res, sRes, xn, sMatG, A); // нужен целый векор xn и только часть res
+  MATxVECT(res, sRes, X, sMatG, A); // нужен целый векор xn и только часть res
   VECTsubVECT(res, sRes, res, b); // нужна только часть b
   VECTxSCAL(res, res, TAU, sRes); // только часть res
   VECTsubVECT(res, sRes, xn, res); // только часть res, xn

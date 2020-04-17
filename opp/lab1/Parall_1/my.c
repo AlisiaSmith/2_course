@@ -5,7 +5,7 @@
 #include <time.h>
 #include <sys/time.h>
 
-#define N 1024
+#define N 8192
 #define EPS 0.000000001
 #define TAU 0.01
 
