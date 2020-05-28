@@ -14,7 +14,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("/sample/sample.fxml"));
         primaryStage.setTitle("Mandelbrod");
-        primaryStage.setScene(new Scene(root, 790, 790));
+        primaryStage.setScene(new Scene(root, 790, 830));
 
         primaryStage.setResizable(false);
         primaryStage.show();

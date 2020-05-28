@@ -1,11 +1,12 @@
 package sample;
 
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-
-
+import javafx.scene.control.Button;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.paint.Color;
 import sample.Field;
 
@@ -26,11 +27,10 @@ public class Controller {
     private Color frCol;;
 
     public Controller() {
-        x = -0.5; y = 0;
         widthContext = 800;
         heightContext = 800;
-        backCol = Color.rgb(150,200,200);
-        frCol = Color.rgb(0,205,170);
+        backCol = Color.rgb(128,179,128);
+        frCol = Color.rgb(102,26,51);
     }
 
     private void paint()
@@ -47,14 +47,46 @@ public class Controller {
     @FXML
     private Canvas canvas;
 
+    @FXML
+    private Button restartButton;
+
+    @FXML
+    private ColorPicker fractalColorPicker;
+
+    @FXML
+    private ColorPicker backgroungColorPicker;
+
+    @FXML
+    void changeBackgroundColor(ActionEvent event) {
+        backCol = backgroungColorPicker.getValue();
+        paint();
+    }
+
+    @FXML
+    void changeFractalColor(ActionEvent event) {
+        frCol = fractalColorPicker.getValue();
+        paint();
+    }
+
+    @FXML
+    void restart(ActionEvent event) {
+        x = -0.5; y = 0;
+        field.setScale(1.1);
+        field.setField(x, y, 2);
+        backgroungColorPicker.setValue(backCol);
+        fractalColorPicker.setValue(frCol);
+        paint();
+    }
+
+
+
 
     @FXML
     void initialize() {
 
         field = new Field(widthContext, heightContext);
         context = canvas.getGraphicsContext2D();
-        field.setField(x, y, 2);
-        paint();
+        restart(null);
 
         canvas.setOnMouseClicked(event -> {
             x = event.getX();
@@ -67,6 +99,8 @@ public class Controller {
 
             paint();
         });
+
+
 
     }
 }

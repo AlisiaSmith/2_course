@@ -16,7 +16,7 @@ public class Field {
     public Field (int col, int row) {
         columns = col;
         rows = row;
-        scale = 1;
+        scale = 1.1;
 
         field = new ArrayList<>();
         for(int i = 0; i < columns; i++)
@@ -41,8 +41,6 @@ public class Field {
                 field.get(i).get(j).setXY(xStart + stepX * i, yStart + stepY * j);
     }
 
-    public void resizeAbs(double x, double y, double scale) { setField(x, y, scale); }
-
     public void resize (int x, int y, boolean isZoomIn)
     {
         if (isZoomIn) {
@@ -51,15 +49,16 @@ public class Field {
         }
         else {
             diam *= scale;
-            if(scale > 0.1) scale -= 0.1;
+            if(scale > 1) scale -= 0.1;
         }
 
         System.out.println(diam);
-        resizeAbs(field.get(x).get(y).getX(), field.get(x).get(y).getY(), diam);
+        setField(field.get(x).get(y).getX(), field.get(x).get(y).getY(), diam);
     }
 
     public boolean getStatus(int x, int y)  { return field.get(x).get(y).getStates(); }
 
+    public void setScale(double scale) { this.scale = scale; }
 
     public void show()
     {
