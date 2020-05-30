@@ -1,7 +1,5 @@
 package sample;
 
-
-
 import java.util.ArrayList;
 
 public class Field {
@@ -28,6 +26,18 @@ public class Field {
 
     }
 
+    public int getColumns() {
+        return columns;
+    }
+
+    public int getRows() {
+        return rows;
+    }
+
+    public Cell getCell(int x, int y){
+        return field.get(x).get(y);
+    }
+
     public void setField(double x, double y, double d)
     {
         diam = d;
@@ -51,8 +61,6 @@ public class Field {
             diam *= scale;
             if(scale > 1) scale -= 0.1;
         }
-
-        System.out.println(diam);
         setField(field.get(x).get(y).getX(), field.get(x).get(y).getY(), diam);
     }
 
@@ -69,8 +77,7 @@ public class Field {
                     System.out.print(" ");
                 else
                     System.out.print("+");
-             System.out.println();
+            System.out.println();
         }
     }
 }
-

@@ -19,7 +19,6 @@ public class Cell {
     {
         setX(x);
         setY(y);
-        calc();
     }
 
     public double getX() { return x; }
