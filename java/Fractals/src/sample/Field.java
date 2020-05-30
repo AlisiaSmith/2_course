@@ -6,8 +6,11 @@ public class Field {
 
     private int columns = 0;
     private int rows = 0;
-    private double diam;
+    private double diam = 2;
     private double scale;
+
+    private double xCentre;
+    private double yCentre;
 
     private ArrayList<ArrayList<Cell>> field;
 
@@ -26,54 +29,56 @@ public class Field {
 
     }
 
-    public int getColumns() {
-        return columns;
+    public int getColumns() { return columns; }
+
+    public int getRows() { return rows; }
+
+    public boolean getStatus(int x, int y)  { return getCell(x, y).getStates(); }
+
+    public Cell getCell(int x, int y){ return field.get(x).get(y); }
+
+    public void setDiam(double diam) { this.diam = diam; }
+
+    public void setScale(double scale) { this.scale = scale; }
+
+    public void setCentre(double xCentre, double yCentre) {
+        this.xCentre = xCentre;
+        this.yCentre = yCentre;
     }
 
-    public int getRows() {
-        return rows;
-    }
-
-    public Cell getCell(int x, int y){
-        return field.get(x).get(y);
-    }
-
-    public void setField(double x, double y, double d)
+    public void setField(double num, double size)
     {
-        diam = d;
         double stepX = diam / columns;
         double stepY = diam / rows;
-        double xStart = x - (double)columns / 2 * stepX;
-        double yStart = y - (double)rows / 2 * stepY;
+        double xStart = xCentre - ((double)columns / 2 - num * columns / size) * stepX;
+        double yStart = yCentre - (double)rows / 2 * stepY;
 
-        for(int i = 0; i < columns; i++)
+        for(int i = (int) (num * columns / size), k = 0; i < (num + 1) * columns / size; k++, i++)
             for(int j = 0; j < rows; j++)
-                field.get(i).get(j).setXY(xStart + stepX * i, yStart + stepY * j);
+                getCell(i, j).setXY(xStart + stepX * k, yStart + stepY * j);
     }
 
-    public void resize (int x, int y, boolean isZoomIn)
+    public void setZoom (int x, int y, boolean isZoomIn)
     {
+        setCentre(getCell(x,y).getX(),getCell(x,y).getY());
         if (isZoomIn) {
             scale += 0.1;
             diam /= scale ;
         }
         else {
             diam *= scale;
-            if(scale > 1) scale -= 0.1;
+            if (scale > 1) scale -= 0.1;
         }
-        setField(field.get(x).get(y).getX(), field.get(x).get(y).getY(), diam);
+        setDiam(diam);
     }
 
-    public boolean getStatus(int x, int y)  { return field.get(x).get(y).getStates(); }
-
-    public void setScale(double scale) { this.scale = scale; }
 
     public void show()
     {
         for(int i = 0; i < columns; i++)
         {
             for(int j = 0; j < rows; j++)
-                if(field.get(i).get(j).getStates())
+                if(getCell(i, j).getStates())
                     System.out.print(" ");
                 else
                     System.out.print("+");

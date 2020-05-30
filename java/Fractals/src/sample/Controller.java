@@ -14,11 +14,10 @@ import java.util.ArrayList;
 
 public class Controller {
 
-    private double x, y;
     private int widthContext;
     private int heightContext;
 
-    private int fieldsNumber = 4;
+    private int fieldsNumber;
     private Field field;
 
     private boolean ZOOM_IN = true;
@@ -29,6 +28,7 @@ public class Controller {
     private Color frCol;;
 
     public Controller() {
+        fieldsNumber = 2;
         widthContext = 800;
         heightContext = 800;
         backCol = Color.rgb(130,180,130);
@@ -38,7 +38,6 @@ public class Controller {
     private void treadsRun()
     {
         ArrayList <ThreadField> tf = new ArrayList<ThreadField>();
-
 
         for(int i = 0; i < fieldsNumber; i++)
         {
@@ -83,16 +82,16 @@ public class Controller {
     }
 
     @FXML
-    void changeFractalColor(ActionEvent event) {
+    void changeFractalColor() {
         frCol = fractalColorPicker.getValue();
         paint();
     }
 
     @FXML
-    void restart(ActionEvent event) {
-        x = -0.5; y = 0;
+    void restart() {
+        field.setCentre(-0.5, 0);
         field.setScale(1.1);
-        field.setField(x, y, 2);
+        field.setDiam(2);
 
         treadsRun();
         paint();
@@ -100,13 +99,13 @@ public class Controller {
 
     @FXML
     void zooming(MouseEvent event) {
-        x = event.getX();
-        y = event.getY();
+        int x = (int)event.getX();
+        int y = (int)event.getY();
 
         if(event.isControlDown())
-            field.resize((int)x,(int)y,ZOOM_OUT);
+            field.setZoom(x, y, ZOOM_OUT);
         else
-            field.resize((int)x,(int)y,ZOOM_IN);
+            field.setZoom(x, y, ZOOM_IN);
 
         treadsRun();
         paint();
@@ -121,7 +120,7 @@ public class Controller {
         backgroungColorPicker.setValue(backCol);
         fractalColorPicker.setValue(frCol);
 
-        restart(null);
+        restart();
 
     }
 }

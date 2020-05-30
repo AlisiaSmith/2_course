@@ -17,6 +17,9 @@ public class ThreadField extends Thread {
 
     @Override
     public void run() {
+
+        field.setField(tid, tsize);
+
         int col = field.getColumns() / tsize;
         int row = field.getRows();
         for (int i = tid * col; i < (tid +1) * col ; i++)
